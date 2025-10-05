@@ -1,0 +1,5 @@
+pandas==2.2.2
+requests==2.31.0
+python-dotenv==1.0.1
+simple-salesforce==1.12.5
+Faker==25.8.0
