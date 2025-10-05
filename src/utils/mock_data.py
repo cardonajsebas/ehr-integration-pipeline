@@ -18,6 +18,7 @@ FUTURE_STATUSES = ['booked', 'cancelled']
 # Patients
 def generate_patient_data(n: int, organization_id: str) -> pd.DataFrame:
     """Generate mock patient data for Miami-Dade area."""
+    
     patients = []
     for _ in range(n):
         gender = random.choice(['male', 'female'])
@@ -51,6 +52,7 @@ def generate_patient_data(n: int, organization_id: str) -> pd.DataFrame:
 # Appointments
 def random_weekday(start_date: datetime, end_date: datetime) -> datetime:
     """Pick a random weekday datetime between start_date and end_date."""
+    
     while True:
         dt = start_date + timedelta(
             days=random.randint(0, (end_date - start_date).days),
@@ -71,6 +73,7 @@ def make_appointment_dict(row, work_types: dict) -> dict:
     Returns:
         dict: Appointment resource JSON
     """
+    
     wk = next((v for v in work_types.values() if v['display'] == row['work_type']), None)
     if not wk:
         raise ValueError(f"Invalid work_type: {row['work_type']}")
@@ -119,6 +122,7 @@ def generate_appointments(
         pd.DataFrame: Appointments with columns
             [patient_id, provider_id, location_id, work_type, start, end, status]
     """
+    
     start_date = datetime(2025, 1, 1)
     end_date = datetime(2026, 6, 30)
 

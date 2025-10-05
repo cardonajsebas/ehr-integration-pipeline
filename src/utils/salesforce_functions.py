@@ -17,6 +17,7 @@ def load_data_to_salesforce_bulk(sf_connection: Salesforce, dataframe: pd.DataFr
     Returns:
         A dictionary summarizing the results (success count, failure count, and a list of failed records).
     """
+    
     if dataframe.empty:
         return {"success_count": 0, "failure_count": 0, "status": "DataFrame is empty, no records loaded."}
 
@@ -68,6 +69,7 @@ def load_data_to_salesforce_rest(sf_connection: Salesforce, dataframe: pd.DataFr
     using the simple_salesforce REST API 'create' method (single record inserts).
     and returns details of successful and failed inserts.
     """
+    
     if dataframe.empty:
         return {"success_count": 0, "failure_count": 0, "status": "DataFrame is empty, no records loaded.", "successful_records": []}
 
@@ -116,44 +118,6 @@ def load_data_to_salesforce_rest(sf_connection: Salesforce, dataframe: pd.DataFr
         "status": "Job completed successfully."
     }
 
-
-# # Data processing functions:
-# def prepare_service_appointments(appointments_df: pd.DataFrame, sf_maps: dict) -> pd.DataFrame:
-#     """
-#     Maps EHR IDs to Salesforce IDs and prepares the DataFrame for ServiceAppointment insertion.
-#     """
-#     sa_df = appointments_df.copy()
-
-#     # ParentRecordId (Patient): Maps patient_id (EHR) to Account Id (SF)
-#     sa_df['ParentRecordId'] = sa_df['patient_id'].map(sf_maps['patient_to_account'])
-    
-#     # Resource Details Retrieval (Single map lookup based on EHR ID)
-#     sa_df['resource_details'] = sa_df['practitioner_id'].map(sf_maps['practitioner_details'])
-    
-#     # Extract Service_Resource__c
-#     sa_df['Service_Resource__c'] = sa_df['resource_details'].apply(lambda x: x['Service_Resource__c'] if isinstance(x, dict) else None)
-    
-#     # Extract ContactId
-#     sa_df['ContactId'] = sa_df['resource_details'].apply(lambda x: x['ContactId'] if isinstance(x, dict) else None)
-    
-#     # ServiceTerritoryId, WorkTypeId (Standard mappings)
-#     sa_df['ServiceTerritoryId'] = sa_df['location_id'].map(sf_maps['location_to_territory'])
-#     sa_df['WorkTypeId'] = sa_df['work_type_code'].map(sf_maps['worktype_code_to_id'])
-
-#     # Service Resource and Contact Mappings
-#     required_cols = ['ParentRecordId', 'Service_Resource__c', 'ContactId', 'WorkTypeId']
-#     sa_df_ready = sa_df.dropna(subset=required_cols).copy()
-    
-#     skipped_count = len(sa_df) - len(sa_df_ready)
-#     if skipped_count > 0:
-#         print(f"⚠️ Skipped {skipped_count} Service Appointments due to missing mappings (Patient, Resource, Contact, or Work Type).")
-    
-#     final_cols = [
-#         'EHR_Appointment_Id__c', 'ParentRecordId', 'Service_Resource__c', 'ContactId', 'ServiceTerritoryId', 'WorkTypeId',
-#         'SchedStartTime', 'SchedEndTime', 'Status'
-#     ]
-    
-#     return sa_df_ready[final_cols]
 
 
 

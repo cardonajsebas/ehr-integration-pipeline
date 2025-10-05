@@ -10,9 +10,8 @@ organization_id = os.getenv('HAPI_ORG_ID')
 
 #Locations:
 def locations_to_df(ehr:EHR, org_id:str) -> pd.DataFrame:
-    """
-    Normalize FHIR Location resources into a DataFrame.
-    """
+    """Normalize FHIR Location resources into a DataFrame."""
+    
     response = ehr.get_resource('Location', f'organization={org_id}')
     locations = []
     for entry in response.get('entry', []):
@@ -50,9 +49,8 @@ def locations_to_df(ehr:EHR, org_id:str) -> pd.DataFrame:
 
 # Practitioners:
 def providers_to_df(ehr:EHR, org_id:str, count: int = 50) -> pd.DataFrame:
-    """
-    Build dataframe with provider details (Practitioner + Role).
-    """
+    """Build dataframe with provider details (Practitioner + Role)."""
+    
     roles = ehr.get_practitioner_roles(org_id, count)
     providers = []
 

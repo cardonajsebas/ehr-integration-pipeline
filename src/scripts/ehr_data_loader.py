@@ -10,9 +10,8 @@ organization_id = os.getenv('HAPI_ORG_ID')
 
 # Organization
 def load_organization(ehr:EHR, new_org):
-    """
-    Load custom organization into HAPI FHIR.
-    """
+    """Load custom organization into HAPI FHIR."""
+    
     new_org = {
         'resourceType': 'Organization',
         'name': 'JSC Health Integration Demo',
@@ -35,9 +34,8 @@ def load_organization(ehr:EHR, new_org):
 
 # Location
 def load_location(ehr:EHR, new_location):
-    """
-    Load custom location into HAPI FHIR.
-    """
+    """Load custom location into HAPI FHIR."""
+    
     new_location = {
         'resourceType': 'Location',
         'name': 'JSC South Miami Clinic',
@@ -58,9 +56,8 @@ def load_location(ehr:EHR, new_location):
 
 # Practitioner
 def load_practitioner(ehr:EHR, new_practitioner):
-    """
-    Load custom practitioner into HAPI FHIR.
-    """
+    """Load custom practitioner into HAPI FHIR."""
+    
     new_practitioner = {
         'resourceType': 'Practitioner',
         'name': [
@@ -90,9 +87,8 @@ def load_practitioner(ehr:EHR, new_practitioner):
 
 # Practitioner_Role
 def load_practitioner_role(ehr:EHR, role, practitioner_id, organization_id, location_id):
-    """
-    Load Practitioner_Role into HAPI FHIR.
-    """
+    """Load Practitioner_Role into HAPI FHIR."""
+    
     role = {
         'resourceType': 'PractitionerRole',
         'practitioner': {
@@ -123,9 +119,8 @@ def load_practitioner_role(ehr:EHR, role, practitioner_id, organization_id, loca
 
 # Patients
 def load_patients(ehr:EHR, patients_df):
-    """
-    Load generated patients DataFrame into HAPI FHIR.
-    """
+    """Load generated patients DataFrame into HAPI FHIR."""
+    
     for _, row in patients_df.iterrows():
         patient = {
             'resourceType': 'Patient',
@@ -145,9 +140,8 @@ def load_patients(ehr:EHR, patients_df):
 
 # Appointments
 def load_appointments(ehr:EHR, appointments_df, work_types:dict, sleep_time:float = 0.5):
-    """
-    Load generated appointments DataFrame into HAPI FHIR.
-    """
+    """Load generated appointments DataFrame into HAPI FHIR."""
+    
     total = len(appointments_df)
     print(f"Starting to POST {total} appointments...")
     responses = []
@@ -167,6 +161,5 @@ def load_appointments(ehr:EHR, appointments_df, work_types:dict, sleep_time:floa
 
     print("Finished posting appointments.")
     return responses
-
 
 

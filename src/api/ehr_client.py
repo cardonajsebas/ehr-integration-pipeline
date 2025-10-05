@@ -7,7 +7,7 @@ class EHR:
     Base class for Electronic Health Record (EHR) integrations.
     Provides common functionality for creating and geting FHIR resources.
     """
-
+    
     def __init__(self, base_url="https://hapi.fhir.org/baseR4"):
         self.base_url = base_url
         self.headers = {'Content-Type': 'application/fhir+json'}
@@ -26,6 +26,7 @@ class EHR:
         Returns:
             dict: API response JSON
         """
+        
         response = requests.post(
             f'{self.base_url}/{resource_type}',
             headers=self.headers,
@@ -37,21 +38,25 @@ class EHR:
     # Organization
     def post_organization(self, new_org:dict) -> dict:
         """Create a new Organization resource."""
+        
         return self._post_resource('Organization', new_org)
 
     # Location
     def post_location(self, new_location:dict) -> dict:
         """Create a new Location resource."""
+        
         return self._post_resource('Location', new_location)
 
     # Practitioner
     def post_practitioner(self, new_practitioner:dict) -> dict:
         """Create a new Practitioner resource."""
+        
         return self._post_resource('Practitioner', new_practitioner)
 
     # Practitioner Role
     def post_practitioner_role(self, new_pract_role:dict) -> dict:
         """Create a new PractitionerRole resource."""
+        
         return self._post_resource('PractitionerRole', new_pract_role)
 
     # Patient
@@ -65,6 +70,7 @@ class EHR:
         Returns:
             dict: API response JSON
         """
+        
         return self._post_resource('Patient', patient)
 
     # Appointment
@@ -78,6 +84,7 @@ class EHR:
         Returns:
             dict: API response JSON
         """
+        
         return self._post_resource('Appointment', appointment)
 
 
@@ -95,6 +102,7 @@ class EHR:
         Returns:
             dict: JSON response
         """
+        
         url = f"{self.base_url}/{resource_type}/_search?{search_criteria}"
         response = requests.get(url)
         response.raise_for_status()
@@ -111,6 +119,7 @@ class EHR:
         Returns:
             list: Combined list of all resource entries across pages.
         """
+        
         entries = []
         while url:
             response = requests.get(url, params=params)
@@ -128,9 +137,8 @@ class EHR:
 
     # Practitioners:
     def get_practitioner_roles(self, org_id:str, count:int = 50) -> dict:
-        """
-        Fetch PractitionerRole resources for a given Organization.
-        """
+        """Fetch PractitionerRole resources for a given Organization."""
+        
         url = f'{self.base_url}/PractitionerRole'
         params = {
             '_count': count,
@@ -141,10 +149,8 @@ class EHR:
         return response.json()
 
     def get_practitioner(self, practitioner_id:str) -> dict:
-
-        """
-        Fetch a single Practitioner resource by ID.
-        """
+        """Fetch a single Practitioner resource by ID."""
+        
         url = f'{self.base_url}/Practitioner/{practitioner_id}'
         response = requests.get(url)
         response.raise_for_status()
@@ -161,6 +167,7 @@ class EHR:
         Returns:
             list: A list of all appointment "entry" objects from the FHIR bundle.
         """
+        
         url = f"{self.base_url}/Appointment"
         
         params = {"patient.organization": f"Organization/{organization_id}"}

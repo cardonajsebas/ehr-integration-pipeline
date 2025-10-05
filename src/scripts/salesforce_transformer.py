@@ -21,6 +21,7 @@ def transform_locations_for_sf(locations_df: pd.DataFrame) -> pd.DataFrame:
 # --- Work Types Transformer ---
 def transform_work_types_for_sf() -> pd.DataFrame:
     """Creates a DataFrame for standard Work Types."""
+    
     WORK_TYPES = {
         "newpatient": {"code": "WT123", "display": "New Patient Consultation"},
         "followup": {"code": "WT456", "display": "Follow-up Visit"},
@@ -35,6 +36,7 @@ def transform_work_types_for_sf() -> pd.DataFrame:
     work_types_df = pd.DataFrame(work_type_list)
     work_types_df['EstimatedDuration'] = 30
     work_types_df['DurationType'] = 'Minutes'
+    
     return work_types_df[['Name', 'EstimatedDuration', 'DurationType', 'EHR_Work_Type_Id__c']]
 
 # --- Provider/User Transformer ---
