@@ -1,130 +1,169 @@
 # EHR to Salesforce ETL Pipeline
 
-## Abstract
-This project is a demonstration of a complete **ETL (Extract, Transform, Load)** pipeline built with **Python**. It simulates a real-world data engineering task: integrating a healthcare provider's **Electronic Health Record (EHR)** system with **Salesforce Health Cloud**.
+A Python ETL pipeline that integrates FHIR-compliant Electronic Health Record data with Salesforce Health Cloud. Extracts patient, provider, and appointment data from a public HAPI FHIR API, transforms it with Pandas, and loads it into the corresponding Salesforce Health Cloud objects.
 
-The pipeline extracts patient, provider, and appointment data from a public **FHIR-compliant API (HAPI FHIR)**, transforms the data into a schema compatible with Salesforce objects, and loads it into a Salesforce Developer Org.
-
-**Core Technologies**: Python, Pandas, HAPI FHIR API, Simple Salesforce, Salesforce REST API.
-
-## Features
-
-### Modular ETL Architecture
-The code is cleanly separated into distinct **Extract**, **Transform**, and **Load** stages for clarity and maintainability.
-
-### EHR Data Extraction
-Connects to a FHIR API to pull key healthcare resources:
-* Locations
-* Practitioners & Practitioner Roles
-* Patients
-* Appointments
-
-### Data Transformation
-Utilizes the **Pandas** library to clean, reshape, and map the hierarchical JSON data from the EHR into relational tables ready for Salesforce.
-
-### Salesforce Data Loading
-Inserts the transformed data into the corresponding Salesforce Health Cloud objects:
-* `ServiceTerritory` (from Locations)
-* `User` & `ServiceResource` (from Practitioners)
-* `Account` (from Patients)
-* `WorkType`
-* `ServiceAppointment` (from Appointments)
-
-### Dependency Handling
-The pipeline correctly loads objects in the required order, handling dependencies such as creating `User` records before their associated `ServiceResource` records.
-
-### Environment Configuration
-Securely manages credentials and environment-specific IDs using a `.env` file.
-
-### Data Seeding
-Includes a script to populate the source EHR system with mock data, making the project fully reproducible.
-
----
-## Project Architecture
-The project follows a logical and scalable structure that separates concerns:
-
-    └───ehr_etl_project
-        ├───main.py                 # Main entry point to run the pipeline
-        ├───.env                    # For storing environment variables (credentials, IDs)
-        ├───README.md               # This file
-        ├───requirements.txt        # Project dependencies
-        │
-        └───src
-            ├───api                 # API client for the EHR system
-            │   └───ehr_client.py
-            ├───pipelines           # High-level orchestrators for ETL jobs
-            │   └───main_etl_pipeline.py
-            ├───scripts             # Individual, runnable scripts
-            │   ├───ehr_data_loader.py      # Seeds the source EHR with mock data
-            │   ├───ehr_data_processor.py   # Extracts and parses data from the EHR
-            │   └───salesforce_transformer.py # All data transformation logic
-            └───utils               # Reusable utility functions
-                ├───mock_data.py
-                ├───salesforce_functions.py # Generic Salesforce data loading functions
-                └───salesforce_mapper.py    # Queries Salesforce to map existing IDs
+> Built as a portfolio project to demonstrate data engineering skills in healthcare API integration, ETL pipeline design, and Salesforce data loading.
 
 ---
 
-## Setup and Installation
+## Context
 
-### Prerequisites:
-* **Python 3.9+**
-* A **Salesforce Developer Edition Org** preferibly with the Health Cloud package installed.
+Healthcare systems store clinical data in FHIR (Fast Healthcare Interoperability Resources) format, an industry standard for exchanging health information. This pipeline bridges that format with Salesforce Health Cloud, which uses its own relational object model. The transformation layer handles the structural mismatch between hierarchical FHIR JSON and the flat, ID-linked Salesforce schema.
 
-Follow these steps to set up the project locally:
+The pipeline uses the public [HAPI FHIR server](https://hapi.fhir.org/) as the source system, making it fully reproducible without access to a real EHR system.
 
-1.  **Clone the repository**:
-    ```bash
-    git clone <https://github.com/cardonajsebas/ehr-integration-pipeline>
-    cd ehr_etl_project
-    ```
-
-2.  **Create and activate a virtual environment**:
-    ```bash
-    # For Windows
-    python -m venv venv
-    .\venv\Scripts\activate
-
-    # For macOS/Linux
-    python3 -m venv venv
-    source venv/bin/activate
-    ```
-
-3.  **Install the required dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Configure Environment Variables**:
-    Create a file named `.env` in the root directory of the project and populate it with your credentials. **This file should not be committed to version control.**
-
-    ```ini
-    # .env file
-    # Salesforce Credentials
-    SF_USERNAME="your_salesforce_username@example.com"
-    SF_PASSWORD="your_salesforce_password"
-    SF_SECURITY_TOKEN="your_salesforce_security_token"
-
-    # HAPI FHIR Organization ID (can be pre-generated or created by the loader script)
-    HAPI_ORG_ID="your_hapi_org_id"
-    ```
 ---
 
-## How to Run the Pipeline
-The pipeline is a two-step process. First, you seed the source EHR with mock data. Second, you run the ETL pipeline to move that data to Salesforce.
+## Architecture
 
-### Step 1: Seed the EHR with Mock Data
-This script creates the necessary `Organization`, `Location`, `Practitioner`, `Patient`, and `Appointment` records in the public HAPI FHIR server.
+```
+ehr-integration-pipeline/
+│
+├── src/
+│   ├── api/
+│   │   └── ehr_client.py               # HAPI FHIR API client
+│   ├── pipelines/
+│   │   └── main_etl_pipeline.py        # Pipeline orchestrator
+│   ├── scripts/
+│   │   ├── ehr_data_loader.py          # Seeds the FHIR server with mock data
+│   │   ├── ehr_data_processor.py       # Extracts and parses FHIR resources
+│   │   └── salesforce_transformer.py   # Transforms FHIR data to Salesforce schema
+│   └── utils/
+│       ├── mock_data.py                # Mock patient and appointment data
+│       ├── salesforce_functions.py     # Generic Salesforce loading functions
+│       └── salesforce_mapper.py        # Maps existing Salesforce IDs
+│
+├── tests/                              # Unit tests
+├── requirements.txt
+├── .env.example
+└── README.md
+```
+
+---
+
+## ETL Flow
+
+| Stage | Script | Description |
+|---|---|---|
+| Extract | `ehr_data_processor.py` | Pulls Locations, Practitioners, Patients, and Appointments from HAPI FHIR |
+| Transform | `salesforce_transformer.py` | Reshapes FHIR JSON into Salesforce-compatible flat records |
+| Load | `salesforce_functions.py` | Inserts records into Salesforce objects in dependency order |
+
+**Salesforce objects loaded:**
+
+| FHIR Resource | Salesforce Object |
+|---|---|
+| Location | ServiceTerritory |
+| Practitioner | User, ServiceResource |
+| Patient | Account |
+| Appointment | WorkType, ServiceAppointment |
+
+Load order follows object dependencies: `User` records are created before their associated `ServiceResource` records.
+
+---
+
+## Tech Stack
+
+| Tool | Purpose |
+|---|---|
+| **Python** | Core ETL scripting |
+| **Pandas** | Data transformation and reshaping |
+| **HAPI FHIR API** | Source EHR system (public FHIR R4 server) |
+| **Simple Salesforce** | Salesforce REST API client |
+| **Salesforce Health Cloud** | Target system for transformed data |
+
+---
+
+## Prerequisites
+
+- Python 3.9+
+- A Salesforce Developer Edition org with Health Cloud installed
+- Access to the public HAPI FHIR server (no credentials required)
+
+---
+
+## Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/cardonajsebas/ehr-integration-pipeline
+cd ehr-integration-pipeline
+```
+
+### 2. Create and activate a virtual environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure environment variables
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and fill in your credentials:
+
+```bash
+# Salesforce credentials
+SF_USERNAME=your_salesforce_username@example.com
+SF_PASSWORD=your_salesforce_password
+SF_SECURITY_TOKEN=your_salesforce_security_token
+
+# HAPI FHIR organization ID
+HAPI_ORG_ID=your_hapi_org_id
+```
+
+The `HAPI_ORG_ID` is created by the seed script in Step 1 of the pipeline below.
+
+---
+
+## How to Run
+
+### Step 1 - Seed the EHR with mock data
+
+Creates `Organization`, `Location`, `Practitioner`, `Patient`, and `Appointment` records on the public HAPI FHIR server. Skip this step if you already have an existing organization ID with data.
 
 ```bash
 python -m src.scripts.ehr_data_loader
 ```
-(Note: This step can be skipped if you are targeting an existing organization ID in the .env file that already has data.)
 
-Step 2: Run the Main ETL Pipeline
-This script executes the full Extract, Transform, and Load process.
+Copy the generated `HAPI_ORG_ID` from the output and add it to your `.env` file.
+
+### Step 2 - Run the ETL pipeline
+
+Executes the full Extract, Transform, and Load process. Progress and load results are printed to the console.
+
 ```bash
 python -m src.pipelines.main_etl_pipeline
 ```
 
-The script will print its progress to the console, showing the status of each phase and summarizing the results of the data loads into Salesforce.
+---
+
+## Credits
+
+Built using the [HAPI FHIR public test server](https://hapi.fhir.org/) and the [Simple Salesforce](https://github.com/simple-salesforce/simple-salesforce) library.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## About
+
+Built by **John S Cardona** as a portfolio project demonstrating data engineering skills in API integration and ETL pipeline design.
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/sebastian-cardona)
+[![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=for-the-badge&logo=google-chrome&logoColor=white)](https://cardonajsebas.github.io/)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/cardonajsebas)
